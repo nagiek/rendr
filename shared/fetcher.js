@@ -163,11 +163,11 @@ Fetcher.prototype._retrieveModel = function(spec, callback) {
   var fetcher = this;
 
   // Attempt to fetch from the modelStore based on the idAttribute
-  this.modelUtils.modelIdAttribute(spec.model, function(idAttribute) {
-    var modelData = fetcher.modelStore.get(spec.model, spec.params[idAttribute], true);
-    if (modelData)
-      return callback(null, modelData);
+  var modelData = fetcher.modelStore.get(spec.model, spec.id, true);
+  if (modelData)
+    return callback(null, modelData);
 
+  this.modelUtils.modelIdAttribute(spec.model, function(idAttribute) {
     // if there are no other keys than the id in the params, return null;
     if (_.isEmpty(_.omit(spec.params, idAttribute)))
       return callback(null, null);
@@ -226,8 +226,8 @@ Fetcher.prototype.fetchFromApi = function(spec, options, callback) {
 
   if (spec.model) {
     query = new Parse.Query(spec.model, this.buildOptions(null, spec.params))
-    if (spec.params.objectId) {
-      query.get(spec.params.objectId, {success: success, error: error});
+    if (spec.id) {
+      query.get(spec.id, {success: success, error: error});
     } else {
       _.each(spec.params, function(key, value) {
         func = _.isArray(value) ? "containedIn" : "equalTo"
@@ -258,22 +258,19 @@ Fetcher.prototype.retrieveModels = function(modelName, modelIds) {
 };
 
 Fetcher.prototype.summarize = function(modelOrCollection) {
-  var summary = {},
-      idAttribute;
+  var summary = {};
 
   if (this.modelUtils.isCollection(modelOrCollection)) {
-    idAttribute = modelOrCollection.model.prototype.idAttribute;
     summary = {
       collection: this.modelUtils.modelName(modelOrCollection.constructor),
-      ids: modelOrCollection.pluck(idAttribute),
+      ids: _.pluck(modelOrCollection.models, "id"),
       params: modelOrCollection.params,
       meta: modelOrCollection.meta
     };
   } else if (this.modelUtils.isModel(modelOrCollection)) {
-    idAttribute = modelOrCollection.idAttribute;
     summary = {
       model: this.modelUtils.modelName(modelOrCollection.constructor),
-      id: modelOrCollection.get(idAttribute)
+      id: modelOrCollection.id
     };
   }
   return summary;

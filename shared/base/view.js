@@ -6,20 +6,20 @@
 var requireAMD = require;
 
 var _ = require('underscore'),
-    Backbone = require('backbone'),
+    Parse = require('parse').Parse,
     async = require('async'),
     isServer = (typeof window === 'undefined'),
     BaseView,
     $;
 
 if (!isServer) {
-  Backbone.$ = window.$ || require('jquery');
-  $ = Backbone.$;
+  Parse.$ = window.$ || require('jquery');
+  $ = Parse.$;
 }
 
 function noop() {}
 
-module.exports = BaseView = Backbone.View.extend({
+module.exports = BaseView = Parse.View.extend({
   constructor: function(options) {
     var obj;
 
@@ -30,7 +30,7 @@ module.exports = BaseView = Backbone.View.extend({
     this.name = this.name || this.app.modelUtils.underscorize(this.constructor.id || this.constructor.name);
 
     // parseOptions deals w/ models and collections, but the BaseView will override those changes
-    Backbone.View.call(this, _.omit(options, ['model', 'collection']));
+    Parse.View.call(this, _.omit(options, ['model', 'collection']));
 
     if (this.postInitialize) {
       console.warn('`postInitialize` is deprecated, please use `initialize`');
@@ -485,7 +485,7 @@ BaseView.attach = function(app, parentView, callback) {
 
 BaseView.parseModelAndCollection = function(modelUtils, options) {
   if (options.model != null) {
-    if (!(options.model instanceof Backbone.Model) && options.model_name) {
+    if (!(options.model instanceof Parse.Object) && options.model_name) {
       options.model = modelUtils.getModel(options.model_name, options.model, {
         parse: true
       });
@@ -512,15 +512,7 @@ BaseView.extractFetchSummary = function (modelUtils, options) {
             if (_.isFunction(value.constructor) && value.constructor.id != null) {
                 modelOrCollectionId = value.constructor.id;
                 if (modelUtils.isModel(value)) {
-                    id = value.get(value.idAttribute);
-                    if (id == null) {
-                        // Bail if there's no ID; someone's using `this.model` in a
-                        // non-standard way, and that's okay.
-                        return;
-                    }
-                    // Cast the `id` attribute to string to ensure it's included in attributes.
-                    // On the server, it can be i.e. an `ObjectId` from Mongoose.
-                    value = id.toString();
+                    value = value.id;
                     fetchSummary[key] = {model: modelOrCollectionId, id: value};
                     return;
                 }

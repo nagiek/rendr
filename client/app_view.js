@@ -1,9 +1,9 @@
 var _ = require('underscore'),
-    Backbone = require('backbone'),
+    Parse = require('parse').Parse,
     BaseView = require('../shared/base/view'),
     $ = (typeof window !== 'undefined' && window.$) || require('jquery');
 
-Backbone.$ = $;
+Parse.$ = $;
 
 module.exports = BaseView.extend({
   el: 'body',

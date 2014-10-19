@@ -1,12 +1,12 @@
 var _ = require('underscore'),
-    Backbone = require('backbone'),
+    Parse = require('parse').Parse,
     syncer = require('../syncer'),
     BaseModel = require('./model'),
-    Super = Backbone.Collection,
+    Super = Parse.Collection,
     isServer = (typeof window === 'undefined');
 
 if (!isServer) {
-  Backbone.$ = window.$ || require('jquery');
+  Parse.$ = window.$ || require('jquery');
 }
 
 BaseCollection = Super.extend({

@@ -11,7 +11,10 @@ _.extend(ModelStore.prototype, Super.prototype, {
   set: function(model) {
     var id, key, modelName;
 
-    id = model.get(model.idAttribute);
+    id = model.id;
+    // Can't cache an unknown...
+    if (id == null) { return; }
+
     modelName = this.modelUtils.modelName(model.constructor);
     if (modelName == null) {
       throw new Error('Undefined modelName for model');
@@ -23,6 +26,9 @@ _.extend(ModelStore.prototype, Super.prototype, {
 
   get: function(modelName, id, returnModelInstance) {
     var key, model;
+
+    // Can't cache an unknown...
+    if (id == null) { return; }
 
     if (returnModelInstance == null) {
       returnModelInstance = false;

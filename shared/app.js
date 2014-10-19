@@ -3,7 +3,7 @@
  * The client also subclasses it for client-specific stuff.
  */
 
-var Backbone = require('backbone'),
+var Parse = require('parse').Parse,
     Fetcher = require('./fetcher'),
     ModelUtils = require('./modelUtils'),
     isServer = (typeof window === 'undefined'),
@@ -11,10 +11,10 @@ var Backbone = require('backbone'),
 
 if (!isServer) {
   ClientRouter = require('app/router');
-  Backbone.$ = window.$ || require('jquery');
+  Parse.$ = window.$ || require('jquery');
 }
 
-module.exports = Backbone.Model.extend({
+module.exports = Parse.Object.extend("App", {
 
   defaults: {
     loading: false,
@@ -47,7 +47,7 @@ module.exports = Backbone.Model.extend({
      * Initialize the `templateAdapter`, allowing application developers to use whichever
      * templating system they want.
      *
-     * We can't use `this.get('templateAdapter')` here because `Backbone.Model`'s
+     * We can't use `this.get('templateAdapter')` here because `Parse.Object`'s
      * constructor has not yet been called.
      */
     var templateAdapterModule = attributes.templateAdapter || this.defaults.templateAdapter;
@@ -72,7 +72,7 @@ module.exports = Backbone.Model.extend({
       });
     }
 
-    Backbone.Model.apply(this, arguments);
+    Parse.Object.apply(this, arguments);
 
     if (this.postInitialize) {
       console.warn('`postInitialize` is deprecated, please use `initialize`');

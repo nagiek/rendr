@@ -5,7 +5,7 @@
  */
 
 var _ = require('underscore'),
-    Backbone = require('backbone'),
+    Parse = require('parse').Parse,
 
     // Pull out params in path, like '/users/:id'.
     extractParamNamesRe = /:([a-z_-]+)/ig,
@@ -24,7 +24,7 @@ if (isServer) {
   var serverOnly_qs = 'qs';
   var qs = require(serverOnly_qs);
 } else {
-  Backbone.$ = window.$ || require('jquery');
+  Parse.$ = window.$ || require('jquery');
 }
 
 var syncer = module.exports;
@@ -52,7 +52,7 @@ function clientSync(method, model, options) {
       error(resp);
     }
   };
-  return Backbone.sync(method, model, options);
+  return Parse.sync(method, model, options);
 }
 
 function serverSync(method, model, options) {
@@ -75,7 +75,6 @@ function serverSync(method, model, options) {
     method: verb,
     path: urlParts[0],
     query: qs.parse(queryStr),
-    headers: options.headers || {},
     api: _.result(this, 'api'),
     body: {}
   };
@@ -94,13 +93,13 @@ function serverSync(method, model, options) {
       };
 
       if (options.error) {
-        // This `error` has signature of $.ajax, not Backbone.sync.
+        // This `error` has signature of $.ajax, not Parse.sync.
         options.error(resp);
       } else {
         throw err;
       }
     } else {
-      // This `success` has signature of $.ajax, not Backbone.sync.
+      // This `success` has signature of $.ajax, not Parse.sync.
       options.success(body);
     }
   });
@@ -220,8 +219,12 @@ syncer.interpolateParams = function interpolateParams(model, url, params) {
       var property = param.slice(1),
           value;
 
+      // Is the idAttribute? Grab it.
+      if (property === model.idAttribute) {
+        value = model.id;
+
       // Is collection? Then use options.
-      if (model.length != null) {
+      } else if (model.length != null) {
         value = model.options[property];
 
       // Otherwise it's a model; use attrs.

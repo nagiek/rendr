@@ -24,10 +24,14 @@ ModelUtils.prototype.getModel = function(path, attrs, options, callback) {
   options = options || {};
   if (typeof callback == 'function') {
     this.getModelConstructor(path, function(Model) {
-      callback(new Model(attrs, options));
+      model = new Model(null, options)
+      if (attrs !== {}) {model._finishFetch(attrs, true);}
+      callback(model);
     });
   } else {
     Model = this.getModelConstructor(path);
+    model = new Model(null, options);
+    if (attrs !== {}) {model._finishFetch(attrs, true);}
     return new Model(attrs, options);
   }
 };
@@ -120,9 +124,9 @@ ModelUtils.prototype.underscorize = function(name) {
  * -> "MyClass"
  *
  * We first look for the 'id' property of the constructor, which is compatible
- * with standard Backbone-style class inheritance.
+ * with standard Parse-style class inheritance.
  *
- * var MyClass = Backbone.Model.extend({});
+ * var MyClass = Parse.Object.extend({});
  * MyClass.name
  * -> ""
  * MyClass.id = "MyClass"

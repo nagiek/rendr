@@ -6,7 +6,7 @@
 var requireAMD = require;
 
 var _ = require('underscore'),
-    Backbone = require('backbone'),
+    Parse = require('parse').Parse,
     BaseRouter = require('../shared/base/router'),
     BaseView = require('../shared/base/view'),
     $ = (typeof window !== 'undefined' && window.$) || require('jquery'),
@@ -15,14 +15,14 @@ var _ = require('underscore'),
     firstRender = true,
     defaultRootPath = '';
 
-Backbone.$ = $;
+Parse.$ = $;
 
 function noop() {}
 
 module.exports = ClientRouter;
 
 function ClientRouter(options) {
-  this._router = new Backbone.Router();
+  this._router = new Parse.Router();
   BaseRouter.apply(this, arguments);
 }
 
@@ -43,13 +43,13 @@ ClientRouter.prototype.previousFragment = null;
 ClientRouter.prototype.currentRoute = null;
 
 /**
- * Instance of Backbone.Router used to manage browser history.
+ * Instance of Parse.Router used to manage browser history.
  */
 ClientRouter.prototype._router = null;
 
 /**
  * We need to reverse the routes in the client because
- * Backbone.History matches in reverse.
+ * Parse.History matches in reverse.
  */
 ClientRouter.prototype.reverseRoutes = true;
 
@@ -61,7 +61,7 @@ ClientRouter.prototype.initialize = function(options) {
   // We do this here so that it's available in AppView initialization.
   this.app.router = this;
 
-  this.on('route:add', this.addBackboneRoute, this);
+  this.on('route:add', this.addParseRoute, this);
   this.on('action:start', this.trackAction, this);
   this.app.on('reload', this.renderView, this);
 
@@ -78,12 +78,12 @@ ClientRouter.prototype.postInitialize = noop;
 
 /**
  * Piggyback on adding new route definition events
- * to also add to Backbone.Router.
+ * to also add to Parse.Router.
  */
-ClientRouter.prototype.addBackboneRoute = function(routeObj) {
+ClientRouter.prototype.addParseRoute = function(routeObj) {
   var handler, name, pattern, route;
 
-  // Backbone.History wants no leading slash on strings.
+  // Parse.History wants no leading slash on strings.
   pattern = (routeObj[0] instanceof RegExp) ? routeObj[0] : routeObj[0].slice(1);
   route = routeObj[1];
   handler = routeObj[2];
@@ -100,7 +100,7 @@ ClientRouter.prototype.getHandler = function(action, pattern, route) {
     action.call(router, params, router.getRenderCallback(route));
   }
 
-  // This returns a function which is called by Backbone.history.
+  // This returns a function which is called by Parse.history.
   return function() {
     var params, paramsArray, redirect;
 
@@ -157,10 +157,10 @@ ClientRouter.prototype.getMainView = function(views) {
 };
 
 /**
- * Proxy to Backbone.Router.
+ * Proxy to Parse.Router.
  */
 ClientRouter.prototype.navigate = function(path, options) {
-  var fragment = Backbone.history.getFragment(path);
+  var fragment = Parse.history.getFragment(path);
 
   // check if local router can handle route
   if (this.matchesAnyRoute(fragment)) {
@@ -198,7 +198,7 @@ ClientRouter.prototype.getParamsHash = function(pattern, paramsArray, search) {
 };
 
 ClientRouter.prototype.matchingRoute = function(path) {
-  return _.find(Backbone.history.handlers, function(handler) {
+  return _.find(Parse.history.handlers, function(handler) {
     return handler.route.test(path);
   });
 };
@@ -275,7 +275,7 @@ ClientRouter.prototype.renderView = function() {
 };
 
 ClientRouter.prototype.start = function() {
-  Backbone.history.start({
+  Parse.history.start({
     pushState: true,
     hashChange: false,
     root: this.options.rootPath || defaultRootPath
@@ -284,7 +284,7 @@ ClientRouter.prototype.start = function() {
 
 ClientRouter.prototype.trackAction = function() {
   this.previousFragment = this.currentFragment;
-  this.currentFragment = Backbone.history.getFragment();
+  this.currentFragment = Parse.history.getFragment();
 };
 
 ClientRouter.prototype.getView = function(key, entryPath, callback) {

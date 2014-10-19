@@ -1,11 +1,11 @@
 var _ = require('underscore'),
-  Backbone = require('backbone'),
+  Parse = require('parse').Parse,
   isServer = (typeof window === 'undefined'),
   isAMDEnvironment = !isServer && (typeof define !== 'undefined'),
   loadNumber = 0;
 
 if (!isServer) {
-  Backbone.$ = window.$ || require('jquery');
+  Parse.$ = window.$ || require('jquery');
 }
 
 function noop() {}
@@ -37,7 +37,7 @@ function BaseRouter(options) {
   this.initialize(options);
 }
 
-_.extend(BaseRouter.prototype, Backbone.Events, {
+_.extend(BaseRouter.prototype, Parse.Events, {
   /**
    * Config
    *   - errorHandler: function to correctly handle error

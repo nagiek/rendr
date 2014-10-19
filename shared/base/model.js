@@ -1,13 +1,13 @@
 var _ = require('underscore'),
-    Backbone = require('backbone'),
+    Parse = require('parse').Parse,
     syncer = require('../syncer'),
     isServer = (typeof window === 'undefined');
 
 if (!isServer) {
-  Backbone.$ = window.$ || require('jquery');
+  Parse.$ = window.$ || require('jquery');
 }
 
-var BaseModel = Backbone.Model.extend({
+var BaseModel = Parse.Object.extend("Base", { 
 
   constructor: function(models, options) {
     // Capture the options as instance variable.
@@ -20,7 +20,7 @@ var BaseModel = Backbone.Model.extend({
       this.app = this.options.collection.app;
     }
 
-    Backbone.Model.apply(this, arguments);
+    Parse.Object.apply(this, arguments);
 
     this.store();
     this.on('change:' + this.idAttribute, this.store, this);

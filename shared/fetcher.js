@@ -237,11 +237,26 @@ Fetcher.prototype.fetchFromApi = function(spec, options, callback) {
     }
 
   } else {
+
+    // Build the collection and the base query.
     collection = this.getCollectionForSpec(spec);
-    _.each(spec.params, function(key, value) {
-      func = _.isArray(value) ? "containedIn" : "equalTo"
-      collection.query[func](key, value);
-    });
+    collection.query = new Parse.Query(collection.model, this.buildOptions({collection: collection}, spec.params));
+
+    if (spec.relation) {
+      // Mimic Parse.Relation::query()
+      var pointer = { __type: "Pointer",
+               className: spec.relation.parent.className,
+               objectId: spec.relation.parent.id };
+        
+      collection.query._addCondition("$relatedTo", "object", pointer);
+      collection.query._addCondition("$relatedTo", "key", spec.relation.key);
+      collection.query._extraOptions.redirectClassNameForKey = spec.relation.key;
+    } else {
+      _.each(spec.params, function(key, value) {
+        func = _.isArray(value) ? "containedIn" : "equalTo"
+        collection.query[func](key, value);
+      });
+    }
     collection.fetch({success: success, error: error})
   }
 };

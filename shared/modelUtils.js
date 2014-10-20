@@ -4,7 +4,8 @@
  * means no AMD-style require calls.
  */
 var BaseModel = require("./base/model"),
-    BaseCollection = require("./base/collection");
+    BaseCollection = require("./base/collection"),
+    Parse = require("parse").Parse;
 
 var typePath = {
   model: "app/models/",
@@ -15,7 +16,7 @@ module.exports = ModelUtils;
 
 function ModelUtils(entryPath) {
   this.entryPath = entryPath;
-  this._classMap = {};
+  this._classMap = Parse.Object._classMap;
 }
 
 ModelUtils.prototype.getModel = function(path, attrs, options, callback) {
